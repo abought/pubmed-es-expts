@@ -6,6 +6,8 @@ Files are "encoded in the NLM/JATS DTD". This is a formal spec, but some XML fil
     version that will look similar.
 http://www.niso.org/apps/group_public/download.php/15933/z39_96-2015.pdf
 """
+from typing import Union
+
 from lxml import etree
 
 
@@ -37,11 +39,10 @@ x_article_editors = etree.XPath('contrib-group/contrib[@contrib-type="editor"]')
 ## These get a list of individual string segments; user can join into one string as needed
 x_body_text = etree.XPath('/article/body/descendant-or-self::*/text()')
 # Figures are allowed to appear many places in the document
+## TODO: this gloms together every figure caption into one long list, which is not the desired behavior
 x_figure_captions = etree.XPath('//fig/caption/descendant-or-self::*/text()')
 
 x_acknowledgements = etree.XPath('/article/back/ack/p/text()')
-
-
 
 
 def parse_xml(fn: str):
@@ -55,7 +56,6 @@ def parse_xml(fn: str):
 
     doc = etree.parse(fn)
     article_meta = x_article_meta(doc)[0]
-
 
     return {
         "journal": one_or_none(x_journal(doc)),

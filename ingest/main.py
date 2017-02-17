@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from ingest import parse_xml
+from ingest import parse_nxml
 
 
 def parse_args():
@@ -21,13 +21,13 @@ def process_directory():
     # Process entire directory
     for root, dirs, files in os.scandir(args.dir):
         for fn in files:
-            yield parse_xml.parse_xml(os.path.join(root, fn))
+            yield parse_nxml.parse_xml(os.path.join(root, fn))
 
 
 def main(args):
     # Parse an xml file
     if args.file:
-        contents = [parse_xml.parse_xml(args.file)]
+        contents = [parse_nxml.parse_xml(args.file)]
     else:
         contents = process_directory()
 
