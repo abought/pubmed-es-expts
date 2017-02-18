@@ -20,7 +20,7 @@ def parse_args():
 
 def process_directory(dirname:str):
     # Process entire directory
-    for root, dirs, files in os.scandir(dirname):
+    for root, dirs, files in os.walk(dirname):
         for fn in files:
             yield parse_nxml.parse_nxml(os.path.join(root, fn))
 

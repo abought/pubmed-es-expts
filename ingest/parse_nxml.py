@@ -22,7 +22,7 @@ def unescape_node(text: Union[str, list, None]) -> Union[str, None]:
     """
     Convert the text of a node from XML-escaped text to a more human-readable string for indexing
     """
-    if isinstance(text, None):
+    if text is None:
         return None
 
     if isinstance(text, list):
