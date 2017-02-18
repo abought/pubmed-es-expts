@@ -1,5 +1,6 @@
 import argparse
 import os
+from pprint import pprint as pp
 
 from ingest import parse_nxml
 
@@ -17,26 +18,29 @@ def parse_args():
     return args
 
 
-def process_directory():
+def process_directory(dirname:str):
     # Process entire directory
-    for root, dirs, files in os.scandir(args.dir):
+    for root, dirs, files in os.scandir(dirname):
         for fn in files:
-            yield parse_nxml.parse_xml(os.path.join(root, fn))
+            yield parse_nxml.parse_nxml(os.path.join(root, fn))
 
 
-def main(args):
+def main(*,filename=None, dirname=None):
     # Parse an xml file
     if args.file:
-        contents = [parse_nxml.parse_xml(args.file)]
+        contents = [parse_nxml.parse_nxml(args.file)]
     else:
-        contents = process_directory()
+        contents = process_directory(args.dir)
 
     # TODO: Then optionally send to elasticsearch
-    if args.dry:
-        pass
-    else:
-        pass
+    # if args.dry:
+    #     Optional future dry-run auditing mode
+    #     pass
+
+    for article in contents:
+        pp(article)
+
 
 if __name__ == '__main__':
     args = parse_args()
-
+    main(filename=args.file, dirname=args.dir)

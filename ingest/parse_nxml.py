@@ -6,13 +6,34 @@ Files are "encoded in the NLM/JATS DTD". This is a formal spec, but some XML fil
     version that will look similar.
 http://www.niso.org/apps/group_public/download.php/15933/z39_96-2015.pdf
 """
+import html
 from typing import Union
 
 from lxml import etree
 
 
+###
+# Text cleanup and convenience functions
+###
+parser = etree.XMLParser(remove_blank_text=True)
+
+
+def unescape_node(text: Union[str, list, None]) -> Union[str, None]:
+    """
+    Convert the text of a node from XML-escaped text to a more human-readable string for indexing
+    """
+    if isinstance(text, None):
+        return None
+
+    if isinstance(text, list):
+        text = ' '.join(text)
+
+    return html.unescape(text)
+
+
 def one_or_none(results: list) -> Union[object, None]:
-    return results[0] if results else None
+    """Get at most one text value, and apply human-friendly post-processing"""
+    return unescape_node(results[0]) if results else None
 
 #####
 #  Precompiled xpath expressions to be used across all documents
@@ -45,16 +66,13 @@ x_figure_captions = etree.XPath('//fig/caption/descendant-or-self::*/text()')
 x_acknowledgements = etree.XPath('/article/back/ack/p/text()')
 
 
-def parse_xml(fn: str):
+def parse_nxml(fn: str):
     """
     Parse xml contents and return (SOMETHING)
     :param fn:
     :return:
     """
-    # TODO: Any of these entries, realistically, will need to be HTML-unescaped if entities are found.
-    # TODO: Write helper function that joins strings if list, then html unescapes if text, returns none if none
-
-    doc = etree.parse(fn)
+    doc = etree.parse(fn, parser=parser)
     article_meta = x_article_meta(doc)[0]
 
     return {
@@ -62,20 +80,20 @@ def parse_xml(fn: str):
 
 
         "title": one_or_none(x_article_title(article_meta)),
-        ## TODO : some of these will require further processing
-        "authors": x_article_title(article_meta),  # List. Do we want to store in a particular form? May provide first, last, affiliation and sometimes even ids depending widely on record. Is a nested doc appropriate?
-        "abstract": x_article_abstract(article_meta),  # May be multiple entries, eg "abstract-type=graphical" vs regular
-        "keywords": x_article_keywords(article_meta) , # List of items
+        ## TODO : add authors later
+        #"authors": x_article_title(article_meta),  # List. Do we want to store in a particular form? May provide first, last, affiliation and sometimes even ids depending widely on record. Is a nested doc appropriate?
+        "abstract": unescape_node(x_article_abstract(article_meta)),  # May be multiple entries, eg "abstract-type=graphical" vs regular
+        "keywords": [unescape_node(s) for s in x_article_keywords(article_meta)],
 
-        "body": x_body_text(doc),  # Body section. May need to decode HTML entities to unicode, and get content of all child tags regardless of nesting. (then space-join maybe?)
-        "figure_captions": x_figure_captions(doc),  # Store these separately. /fig/caption/(any child)?
-        "acknowledgments": x_acknowledgements(doc),  # Might be interesting to see who gets acknowledged a lot?
+        "body": unescape_node(x_body_text(doc)),
+        #"figure_captions": x_figure_captions(doc),  # TODO: Convert to list and store separately. /fig/caption/(any child)?
+        "acknowledgments": unescape_node(x_acknowledgements(doc)),
 
         #"pub_date",  ## Figure out best extraction at a later date
         #"volume",
 
-        "pmid": x_article_pmid(article_meta),
-        "pmc": x_article_pmc(article_meta),
-        "doi": x_article_doi(article_meta)
+        "pmid": one_or_none(x_article_pmid(article_meta)),
+        "pmc": one_or_none(x_article_pmc(article_meta)),
+        "doi": one_or_none(x_article_doi(article_meta))
     }
 
