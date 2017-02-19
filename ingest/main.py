@@ -42,8 +42,7 @@ def main(*, filename=None, dirname=None, drop=False, dry=False):
             pp(article)
         return
 
-    if drop is True:
-        populate_es.setup_index()
+    populate_es.setup_index(drop=drop)
 
     actions = populate_es.make_bulk_actions(contents)
     index_count, errors = populate_es.process_documents(actions)

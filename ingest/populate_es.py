@@ -14,9 +14,9 @@ CONTENT_TYPE = 'article'
 # TODO: Add code to create mappings at a later date; for now rely on first document to come in to set the tone
 
 
-def setup_index(clear: bool=False):
+def setup_index(drop: bool=False):
     """Set up indices for this project in ES, optionally deleting any data already there"""
-    if clear is True:
+    if drop is True:
         client.indices.delete(index=PROJECT_INDEX, ignore=[400, 404])
 
     client.indices.create(index=PROJECT_INDEX, ignore=400)

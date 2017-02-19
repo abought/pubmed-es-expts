@@ -16,8 +16,11 @@ Parse a directory of XMLs and index them via elasticsearch:
 
 `python -m ingest.main --dir data`
 
+## Workflow / query notes
+See how many documents are present: `curl -XGET localhost:9200/pubmed/article/_count`
+
+
 ## TODO
-- Write simple parsing logic for Pubmed XMLs
-- Define ES schema to fill in for articles 
-- Kibana to explore dataset trends
+- Improve ES Mappings to get the most out of data (and experiment with tokenizing options) 
+- Experiment with Kibana to get records
 - Simple d3 visualizations, eg # articles per year, 10 biggest journals, etc
