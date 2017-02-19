@@ -12,9 +12,9 @@ A library to demonstrate:
 - `pip install -r requirement.txt`
 
 ## Usage
-Parse a directory of XMLs and index them via elasticsearch:
+Parse a directory of XMLs and index them via elasticsearch (dropping any previous documents):
 
-`python -m ingest.main --dir data`
+`python -m ingest.main --drop --dir data/ `
 
 ## Workflow / query notes
 See how many documents are present: `curl -XGET localhost:9200/pubmed/article/_count`

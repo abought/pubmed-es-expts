@@ -9,7 +9,7 @@ from ingest import populate_es
 def parse_args():
     parser = argparse.ArgumentParser(description='Process a directory of files')
     parser.add_argument('--dry', help='Process as dry run?')
-    parser.add_argument('--drop', default=True, help='Drop all data there and refill from scratch')
+    parser.add_argument('--drop', action='store_true', help='Drop all data there and refill from scratch')
 
     # Can specify a single file, or recursively crawl a directory
     source = parser.add_mutually_exclusive_group(required=True)
