@@ -7,8 +7,14 @@ A library to demonstrate:
 2. Useful queries
 3. Sample visualizations with d3.js
 
-## Requirements 
+## Installation / setup
 - Elasticsearch 5.2.0
+- `pip install -r requirement.txt`
+
+## Usage
+Parse a directory of XMLs and index them via elasticsearch:
+
+`python -m ingest.main --dir data`
 
 ## TODO
 - Write simple parsing logic for Pubmed XMLs

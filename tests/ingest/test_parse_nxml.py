@@ -9,8 +9,8 @@ import pytest
 from ingest import parse_nxml
 
 # TODO: Add tests for x_article_authors and x_article_editors later
-
 # TODO: improve figure captions and add handling
+
 
 ####
 # Fixtures
