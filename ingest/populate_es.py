@@ -1,10 +1,12 @@
 """
 Populate data into elasticsearch
 """
+import logging
 import typing
 
 import elasticsearch.helpers
 
+logger = logging.getLogger(__name__)
 
 # TODO: Initially this will just populate a local ES instance at port 9200; may want to make configurable
 client = elasticsearch.Elasticsearch()
@@ -12,7 +14,7 @@ PROJECT_INDEX = 'pubmed'
 CONTENT_TYPE = 'article'
 
 
-def setup_index(drop: bool=False):
+def setup_index(*, drop: bool=False):
     """Set up indices for this project in ES, optionally deleting any data already there"""
     if drop is True:
         client.indices.delete(index=PROJECT_INDEX, ignore=[400, 404])
@@ -21,11 +23,11 @@ def setup_index(drop: bool=False):
     analysis_settings = {
         "analyzer": {
             "sci_text": {
-                "tokenizer": "sci_shingle",
-                "filter": ["lowercase", "stop"]  # TODO verify stopwords
+                "tokenizer": "standard",
+                "filter": ["lowercase", "stop", "sci_shingle"]
             }
         },
-        "tokenizer": {
+        "filter": {
             "sci_shingle": {
                 # Output up to 3-word phrases
                 "type": "shingle",
@@ -37,7 +39,7 @@ def setup_index(drop: bool=False):
     }
 
     # Reused field types
-    basic_text = {"type": "text"}
+    basic_text = {"type": "text", "analyzer": "standard"}
     ngram_text = {
         "type": "text",
         "analyzer": "sci_text"
@@ -48,7 +50,15 @@ def setup_index(drop: bool=False):
     index_mapping = {
         CONTENT_TYPE: {
             "properties": {
-                "journal": basic_text,  # TODO: Use a multifield (raw or exact) because we may want to search for a very exact title
+                "journal": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {
+                            "type": "text",
+                            "index": "not_analyzed"
+                        }
+                    }
+                },
                 "title": ngram_text,
                 "abstract": ngram_text,
                 "body": ngram_text,
@@ -62,14 +72,18 @@ def setup_index(drop: bool=False):
         }
     }
 
-    client.indices.create(index=PROJECT_INDEX,
-                          body={
-                              "mappings": index_mapping,
-                              "settings": {
-                                  "analysis": analysis_settings
-                              }
-                          },
-                          ignore=400)
+    # Suppress "Index already exists" error, eg if we're just updating the mapping.
+    #   (may suppress mapping errors as a side effect; watch the logs!)
+    ret = client.indices.create(index=PROJECT_INDEX,
+                                body={
+                                    "mappings": index_mapping,
+                                    "settings": {
+                                        "analysis": analysis_settings
+                                    }
+                                },
+                                ignore=400)
+
+    logger.warning('Index create/update result (may include suppressed errors): {}'.format(ret))
 
 
 def make_bulk_actions(docs: typing.Iterator[object]) -> typing.Iterator[object]:
@@ -84,3 +98,7 @@ def make_bulk_actions(docs: typing.Iterator[object]) -> typing.Iterator[object]:
 
 def process_documents(actions):
     return elasticsearch.helpers.bulk(client, actions)
+
+
+if __name__ == '__main__':
+    setup_index(drop=True)
