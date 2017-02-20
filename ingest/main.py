@@ -1,6 +1,7 @@
 import argparse
 import os
 from pprint import pprint as pp
+import time
 
 from ingest import parse_nxml
 from ingest import populate_es
@@ -54,4 +55,7 @@ def main(*, filename=None, dirname=None, drop=False, dry=False):
 
 if __name__ == '__main__':
     args = parse_args()
+
+    t1 = time.time()
     main(filename=args.file, dirname=args.dir, drop=args.drop, dry=args.dry)
+    print(f"Analysis complete. Runtime: {time.time() - t1:.0f} seconds")
