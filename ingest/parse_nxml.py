@@ -45,7 +45,7 @@ x_article_meta = etree.XPath('/article/front/article-meta')
 x_article_title = etree.XPath('title-group/article-title/text()')
 # There may be multiple kinds of abstract; avoid confusion by only fetching one without modifier attributes
 # Fetch abstract as list of strings
-x_article_abstract = etree.XPath('abstract[not(@*)]/descendant-or-self::*/text()')
+x_article_abstract = etree.XPath('abstract/descendant-or-self::*/text()')  # TODO: If article has multiple abstracts (eg types), just use first one for now. Make smarter?
 x_article_keywords = etree.XPath('kwd-group/kwd/text()')
 
 # Identifiers
@@ -82,7 +82,7 @@ def parse_nxml(fn: str):
         "title": one_or_none(x_article_title(article_meta)),
         ## TODO : add authors later
         #"authors": x_article_title(article_meta),  # List. Do we want to store in a particular form? May provide first, last, affiliation and sometimes even ids depending widely on record. Is a nested doc appropriate?
-        "abstract": unescape_node(x_article_abstract(article_meta)),  # May be multiple entries, eg "abstract-type=graphical" vs regular
+        "abstract": one_or_none(x_article_abstract(article_meta)),  # May be multiple entries, eg "abstract-type=graphical" vs regular
         "keywords": [unescape_node(s) for s in x_article_keywords(article_meta)],
 
         "body": unescape_node(x_body_text(doc)),
