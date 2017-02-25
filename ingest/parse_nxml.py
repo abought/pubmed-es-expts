@@ -63,15 +63,22 @@ def pub_date_to_iso(pub_date_node) -> Union[str, None]:
 #####
 #  Precompiled xpath expressions to be used across all documents
 #####
+# Get text from any provided node
+x_node_text = etree.XPath('descendant-or-self::*/text()')
+
 x_journal = etree.XPath('/article/front/journal-meta/journal-title-group/journal-title/text()')
 
 x_article_meta = etree.XPath('/article/front/article-meta')
 # Relative expressions; pass in the article_meta as root node to (maybe) save some searching
 x_article_pub_date = etree.XPath('pub-date')  # May be multiple pub dates, but- !- the pub-type/date-type attributes may contain inconsistent data
+x_article_volume = etree.XPath('volume/text()')
+x_article_issue = etree.XPath('issue/text()')
+x_article_fpage = etree.XPath('fpage/text()')
+
 x_article_title = etree.XPath('title-group/article-title/text()')
 # There may be multiple kinds of abstract; avoid confusion by only fetching one without modifier attributes
 # Fetch abstract as list of strings
-x_article_abstract = etree.XPath('abstract/descendant-or-self::*/text()')  # TODO: If article has multiple abstracts (eg types), just use first one for now. Make smarter?
+x_article_abstract = etree.XPath('abstract')
 x_article_keywords = etree.XPath('kwd-group/kwd/text()')
 
 # Identifiers
@@ -87,7 +94,7 @@ x_article_editors = etree.XPath('contrib-group/contrib[@contrib-type="editor"]')
 x_body_text = etree.XPath('/article/body/descendant-or-self::*/text()')
 # Figures are allowed to appear many places in the document
 ## TODO: this gloms together every figure caption into one long list, which is not the desired behavior
-x_figure_captions = etree.XPath('//fig/caption/descendant-or-self::*/text()')
+x_figure_captions = etree.XPath('//fig/caption')
 
 x_acknowledgements = etree.XPath('/article/back/ack/p/text()')
 
@@ -104,19 +111,24 @@ def parse_nxml(fn: str):
     return {
         "journal": one_text(x_journal(doc)),
 
-        "date": pub_date_to_iso(one_or_none(x_article_pub_date(article_meta))),
         "title": one_text(x_article_title(article_meta)),
         ## TODO : add authors later
         #"authors": x_article_title(article_meta),  # List. Do we want to store in a particular form? May provide first, last, affiliation and sometimes even ids depending widely on record. Is a nested doc appropriate?
-        "abstract": one_text(x_article_abstract(article_meta)),  # May be multiple entries, eg "abstract-type=graphical" vs regular; TODO make this a list field
+
+        # Each article can have multiple abstracts (eg graphical vs regular)
+        "abstract": [unescape_text(x_node_text(n))
+                     for n in x_article_abstract(article_meta)],
         "keywords": [unescape_text(s) for s in x_article_keywords(article_meta)],
 
         "body": unescape_text(x_body_text(doc)),
-        #"figure_captions": x_figure_captions(doc),  # TODO: Convert to list and store separately. /fig/caption/(any child)?
+        "figure_captions": [unescape_text(x_node_text(n))
+                            for n in x_figure_captions(doc)],
         "acknowledgments": unescape_text(x_acknowledgements(doc)),
 
-        #"pub_date",  ## Figure out best extraction at a later date
-        #"volume",
+        "date": pub_date_to_iso(one_or_none(x_article_pub_date(article_meta))),
+        "volume": one_or_none(x_article_volume(article_meta)),
+        "issue": one_or_none(x_article_issue(article_meta)),
+        "fpage": one_or_none(x_article_fpage(article_meta)),
 
         "pmid": one_or_none(x_article_pmid(article_meta)),
         "pmc": one_or_none(x_article_pmc(article_meta)),

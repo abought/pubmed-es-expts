@@ -61,9 +61,17 @@ def setup_index(*, drop: bool=False):
                 },
                 "title": ngram_text,
                 "abstract": ngram_text,
-                "body": ngram_text,
-                "acknowledgments": basic_text,
                 "keywords": {"type": "keyword"},
+
+                "body": ngram_text,
+                "figure_captions": ngram_text,
+                "acknowledgments": basic_text,
+
+                "date": {"type": "date"},
+                ## TODO : Can we safely change these over to numeric fields in future?
+                "volume": basic_text,
+                "issue": basic_text,
+                "fpage": basic_text,
 
                 "pmid": identifier,
                 "pmc": identifier,
