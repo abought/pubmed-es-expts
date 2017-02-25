@@ -47,7 +47,10 @@ def test_x_article_title(article_meta):
 
 def test_x_article_abstract(article_meta):
     actual = parse_nxml.x_article_abstract(article_meta)
-    expected = 'Purpose of the present study was the generation and evaluation of novel thiolated chitosans,\n                    so-named S-protected thiolated chitosans as mucosal drug delivery systems. Stability of all\n                    conjugates concerning swelling and disintegration behavior as well as drug release was examined.\n                    Mucoadhesive properties were evaluated in vitro on intestinal mucosa. Different thiolated chitosans\n                    were generated displaying increasing amounts of attached free thiol groups on the polymer, whereby\n                    more than 50% of these thiol groups were linked with 6-mercaptonicotinamide. Based on the\n                    implementation of this hydrophobic residue, the swelling behavior was 2-fold decreased, whereas\n                    stability was essentially improved. Their mucoadhesive properties were 2- and 14-fold increased\n                    compared to corresponding thiolated and unmodified chitosans, respectively. Release studies out of\n                    matrix tablets comprising the novel conjugates revealed a controlled release of a model peptide.\n                 Accordingly, S-protected thiomers represent a promising type of mucoadhesive polymers for the\n                    development of various mucosal drug delivery systems.\n                '
+    actual = ' '.join(actual)
+
+    expected = 'Highlights ► Synthesis of a novel mucoadhesive thiolated chitosan with protected thiol groups.\n                    ► The novel conjugate exhibited promising mucoadhesive features. ► In vitro\n                    cytotoxicity of the new conjugate was evaluated and found to be non-toxic. ► Swelling\n                    behavior of the polymer decreased with the increase of protection. ► Enhanced cross linking\n                    within the novel conjugate resulted in improved stability.\n                 Purpose of the present study was the generation and evaluation of novel thiolated chitosans,\n                    so-named S-protected thiolated chitosans as mucosal drug delivery systems. Stability of all\n                    conjugates concerning swelling and disintegration behavior as well as drug release was examined.\n                    Mucoadhesive properties were evaluated in vitro on intestinal mucosa. Different thiolated chitosans\n                    were generated displaying increasing amounts of attached free thiol groups on the polymer, whereby\n                    more than 50% of these thiol groups were linked with 6-mercaptonicotinamide. Based on the\n                    implementation of this hydrophobic residue, the swelling behavior was 2-fold decreased, whereas\n                    stability was essentially improved. Their mucoadhesive properties were 2- and 14-fold increased\n                    compared to corresponding thiolated and unmodified chitosans, respectively. Release studies out of\n                    matrix tablets comprising the novel conjugates revealed a controlled release of a model peptide.\n                 Accordingly, S-protected thiomers represent a promising type of mucoadhesive polymers for the\n                    development of various mucosal drug delivery systems.\n                '
+
     actual = ' '.join(actual)
     assert actual == expected
 
@@ -88,4 +91,11 @@ def test_x_acknowledgments(sample_xml):
     actual = parse_nxml.x_acknowledgements(sample_xml)
     actual = ' '.join(actual)
     expected = 'The work was supported by the  ,\n                vice-chancellorship for research (PhD grant, ID: 2010/3/Chem3) and the   (Fonds zur Förderung der wissenschaftlichen Forschung) project No. ZFP\n                235150.\n            '
+    assert actual == expected
+
+
+def test_x_article_pub_date(article_meta):
+    node = parse_nxml.x_article_pub_date(article_meta)[0]
+    actual = parse_nxml.pub_date_to_iso(node)
+    expected = '2012-10-01'
     assert actual == expected
