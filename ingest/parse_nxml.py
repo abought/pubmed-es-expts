@@ -46,7 +46,7 @@ def one_text(results: list) -> Union[str, None]:
 
 
 def pub_date_to_iso(pub_date_node) -> Union[str, None]:
-    if not pub_date_node:
+    if pub_date_node is not None:
         return None
 
     year = pub_date_node.findtext('year')

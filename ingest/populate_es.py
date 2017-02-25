@@ -18,25 +18,35 @@ def setup_index(*, drop: bool=False):
     """Set up indices for this project in ES, optionally deleting any data already there"""
     if drop is True:
         client.indices.delete(index=PROJECT_INDEX, ignore=[400, 404])
-
-    # Predefined analyzers that can be applied to fields
-    analysis_settings = {
-        "analyzer": {
-            "sci_text": {
-                "tokenizer": "standard",
-                "filter": ["lowercase", "stop", "sci_shingle"]
-            }
-        },
-        "filter": {
-            "sci_shingle": {
-                # Output up to 3-word phrases
-                "type": "shingle",
-                "output_unigrams": True,
-                "min_shingle_size": 2,
-                "max_shingle_size": 3
+        # Predefined analyzers that can be applied to fields
+        analysis_settings = {
+            "analyzer": {
+                "sci_text": {
+                    "tokenizer": "standard",
+                    "filter": ["lowercase", "stop", "sci_shingle"]
+                }
+            },
+            "filter": {
+                "sci_shingle": {
+                    # Output up to 3-word phrases
+                    "type": "shingle",
+                    "output_unigrams": True,
+                    "min_shingle_size": 2,
+                    "max_shingle_size": 3
+                }
             }
         }
-    }
+
+        body = {
+            "settings": {
+                "analysis": analysis_settings
+            }
+        }
+        ret = client.indices.create(index=PROJECT_INDEX,
+                                    body=body,
+                                    ignore=400)
+
+        logger.warning('Index create/update result (may include suppressed errors): {}'.format(ret))
 
     # Reused field types
     basic_text = {"type": "text", "analyzer": "standard"}
@@ -80,18 +90,7 @@ def setup_index(*, drop: bool=False):
         }
     }
 
-    # Suppress "Index already exists" error, eg if we're just updating the mapping.
-    #   (may suppress mapping errors as a side effect; watch the logs!)
-    ret = client.indices.create(index=PROJECT_INDEX,
-                                body={
-                                    "mappings": index_mapping,
-                                    "settings": {
-                                        "analysis": analysis_settings
-                                    }
-                                },
-                                ignore=400)
-
-    logger.warning('Index create/update result (may include suppressed errors): {}'.format(ret))
+    client.indices.put_mapping(index=PROJECT_INDEX, doc_type=CONTENT_TYPE, body=index_mapping)
 
 
 def make_bulk_actions(docs: typing.Iterator[object]) -> typing.Iterator[object]:
