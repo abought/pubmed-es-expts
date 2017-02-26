@@ -19,8 +19,20 @@ Parse a directory of XMLs and index them via elasticsearch (dropping any previou
 ## Workflow / query notes
 See how many documents are present: `curl -XGET localhost:9200/pubmed/article/_count`
 
+## Local testing notes
+For the purpose of simple visualizations, you may wish to expose elasticsearch to a browser request directly. 
+
+Note that the visualizations are presented for local demonstration purposes, only. It is generally frowned upon to 
+expose ES directly in production use.
+
+
+To your config file (eg `/usr/local/etc/elasticsearch/elasticsearch.yml`), you would add:
+```yml
+## NOTE: For local testing of ES-based visualizations, ONLY!
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+```
+
 
 ## TODO
-- Improve ES Mappings to get the most out of data (and experiment with tokenizing options) 
-- Experiment with Kibana to get records
 - Simple d3 visualizations, eg # articles per year, 10 biggest journals, etc

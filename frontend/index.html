@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample elasticsearch frontend</title>
+
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+</head>
+<body>
+
+<div id="graph"></div>
+
+
+<script>
+    // Make an ES query to localhost, with a date based aggregation
+    var query = {
+        "size": 0,
+        "aggregations": {
+            "by_year": {
+                "date_histogram": {
+                    "field": "date",
+                    "interval": "year"
+                }
+            }
+        }
+    };
+
+    var res = $.post('http://localhost:9200/pubmed/article/_search',
+        JSON.stringify(query))
+        .then(function(val) {console.log(val)});
+
+</script>
+</body>
+</html>
