@@ -60,6 +60,31 @@ def pub_date_to_iso(pub_date_node) -> Union[str, None]:
     else:
         return datetime.date(*date).isoformat()
 
+
+def contrib_node_to_names(contrib_node) -> object:
+    """Exract author info from a contributor node"""
+    surname = contrib_node.find('name/surname')
+    surname = None if surname is None else surname.text
+
+    given_name = contrib_node.find('name/given-names')
+    given_name= None if given_name is None else given_name.text
+
+    if surname and given_name:
+        full_name = ', '.join([surname, given_name])
+    else:
+        full_name = None
+
+    if any([surname, given_name, full_name]):
+        return {
+            'surname': surname,
+            'given-names': given_name,
+            'full-name': full_name,
+        }
+    else:
+        # This situation would be very surprising, but log to help us better understand the data
+        logger.warning('Detected contributor record with no author name provided!')
+        return None
+
 #####
 #  Precompiled xpath expressions to be used across all documents
 #####
@@ -112,8 +137,7 @@ def parse_nxml(fn: str):
         "journal": one_text(x_journal(doc)),
 
         "title": one_text(x_article_title(article_meta)),
-        ## TODO : add authors later
-        #"authors": x_article_title(article_meta),  # List. Do we want to store in a particular form? May provide first, last, affiliation and sometimes even ids depending widely on record. Is a nested doc appropriate?
+        "authors": [contrib_node_to_names(n) for n in x_article_authors(article_meta)],
 
         # Each article can have multiple abstracts (eg graphical vs regular)
         "abstract": [unescape_text(x_node_text(n))

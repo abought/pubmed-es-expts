@@ -70,6 +70,14 @@ def setup_index(*, drop: bool=False):
                     }
                 },
                 "title": ngram_text,
+                "authors": {
+                    "type": "nested",
+                    "properties": {
+                        "surname": {"type": "keyword"},
+                        "given-names": {"type": "keyword"},
+                        "full-name": {"type": "keyword"}
+                    }
+                },
                 "abstract": ngram_text,
                 "keywords": {"type": "keyword"},
 
