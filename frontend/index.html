@@ -6,29 +6,147 @@
 
     <script src="https://d3js.org/d3.v4.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+
+    <style>
+        .bar {
+            fill: steelblue;
+        }
+
+        .axis text {
+            font: 10px sans-serif;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        .x.axis path {
+            display: none;
+        }
+    </style>
+
 </head>
 <body>
 
-<div id="graph"></div>
+<svg class="chart"></svg>
 
 
 <script>
-    // Make an ES query to localhost, with a date based aggregation
-    var query = {
-        "size": 0,
-        "aggregations": {
-            "by_year": {
-                "date_histogram": {
-                    "field": "date",
-                    "interval": "year"
+    /**
+     * When page loads, make an ES query to localhost, with a date based aggregation
+     * Fetches the data used to power the bar chart of articles by year
+     * @returns {Object[]} Array of {data, count} objects
+     */
+    function getData() {
+        var query = {
+            "size": 0,
+            "aggregations": {
+                "by_year": {
+                    "date_histogram": {
+                        "field": "date",
+                        "interval": "year"
+                    }
                 }
             }
-        }
-    };
+        };
 
-    var res = $.post('http://localhost:9200/pubmed/article/_search',
-        JSON.stringify(query))
-        .then(function(val) {console.log(val)});
+        // Get the data used to draw the histogram
+        return $.post('http://localhost:9200/pubmed/article/_search', JSON.stringify(query))
+            .then(function (res) {
+                return res.aggregations.by_year.buckets.map(function (item) {
+                    return {
+                        date: new Date(item.key),
+                        count: item.doc_count
+                    };
+                })
+            });
+    }
+
+
+    // Draw the base chart
+    var margin = {top: 20, right: 30, bottom: 30, left: 40},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    // TODO: Rethink xscale
+    var x = d3.scaleTime()
+        .range([0, width]);
+
+
+    var y = d3.scaleLinear()
+        .range([height, 0]);
+
+    var xAxis = d3.axisBottom()
+        .scale(x);
+
+    var yAxis = d3.axisLeft()
+        .scale(y);
+
+    var chart = d3.select(".chart")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+    function populateBars(data) {
+        // Initial version draws heavily from:
+        //   https://bost.ocks.org/mike/bar/3/
+//        x.domain([
+//            d3.min(function (d) {
+//                return d.date;
+//            }),
+//            d3.max(function (d) {
+//                return d.date;
+//            })
+//        ]);
+
+        y.domain([0, d3.max(data, function (d) {
+            return d.count;
+        })]);
+
+//        chart.append("g")
+//            .attr("class", "x axis")
+//            .attr("transform", "translate(0," + height + ")")
+//            .call(xAxis);
+
+//        chart.append("g")
+//            .attr("class", "y axis")
+//            .call(yAxis);
+
+        var barWidth = width / data.length;
+
+        var bar = chart.selectAll("g")
+            .data(data)
+            .enter().append("g")
+            .attr("transform", function (d, i) {
+                return "translate(" + i * barWidth + ",0)";
+            });
+
+        bar.append("rect")
+            .attr("y", function (d) {
+                return y(d.count);
+            })
+            .attr("height", function (d) {
+                return height - y(d.count);
+            })
+            .attr("width", barWidth - 1);
+
+        bar.append("text")
+            .attr("x", barWidth / 2)
+            .attr("y", function (d) {
+                return y(d.count) + 3;
+            })
+            .attr("dy", ".75em")
+            .text(function (d) {
+                return d.count;
+            });
+    }
+    // Draw page
+    getData().then(populateBars)
 
 </script>
 </body>
