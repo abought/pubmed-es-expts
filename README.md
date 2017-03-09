@@ -36,3 +36,14 @@ http.cors.allow-origin: "*"
 
 ## TODO
 - Simple d3 visualizations, eg # articles per year, 10 biggest journals, etc
+
+Goal:
+1. When page loads, get a histogram of articles published in a given year (or power the histogram by a search box first?)
+2. When a specific year is clicked on (interacting with chart), fire an aggregation that gets the 10 most popular 
+    keywords for that year, and displays a summary chart + legend for fraction of articles containing- horiontal bar chart
+3. When the summary chart entry for a specific keyword is clicked, fire a query showing highest rated articles with 
+    that word 
+    
+    
+Other options:
+- Pie chart? (number of authors, eg 1, 2, 3, 4-6, 6-10, 10+) Then drill down in some way, eg most common terms to explore large collaborations?
