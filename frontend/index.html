@@ -11,7 +11,9 @@
         .bar {
             fill: steelblue;
         }
-
+        text.label  {
+            fill: #CCCCCC;
+        }
         .axis text {
             font: 10px sans-serif;
         }
@@ -65,7 +67,7 @@
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
 
         function getData() {
@@ -96,13 +98,15 @@
     function populateBars(data) {
         // Initial version draws heavily from:
         //   https://bost.ocks.org/mike/bar/3/
+        //   and d3 v4 update, https://bl.ocks.org/d3noob/bdf28027e0ce70bd132edc64f1dd7ea4
         x.domain(data.map(function (d) {
             return d.date;
         }));
 
-        y.domain([0, d3.max(data, function (d) {
-            return d.count;
-        })]);
+        y.domain([
+            0,
+            d3.max(data, function (d) {return d.count;}) + 1
+        ]);
 
         chart.append("g")
             .attr("class", "x axis")
@@ -113,9 +117,13 @@
             .attr("class", "y axis")
             .call(yAxis);
 
-        chart.selectAll(".bar")
+        var bars = chart.selectAll(".bars")
             .data(data)
-            .enter().append("rect")
+            .enter()
+            .append("g")
+            .attr("class", "bars");
+
+        bars.append("rect")
             .attr("class", "bar")
             .attr("x", function (d) {
                 return x(d.date);
@@ -128,15 +136,16 @@
             })
             .attr("width", x.bandwidth());
 
-//        bar.append("text")
-//            .attr("x", barWidth / 2)
-//            .attr("y", function (d) {
-//                return y(d.count) + 3;
-//            })
-//            .attr("dy", ".75em")
-//            .text(function (d) {
-//                return d.count;
-//            });
+        bars.append("text")
+            .attr('class', 'label')
+            .attr("x", function(d){return x(d.date) + x.bandwidth() / 2;})
+            .attr("y", function (d) {
+                return y(d.count + 1);
+            })
+            .attr("dy", ".75em")
+            .text(function (d) {
+                return d.count;
+            });
     }
     // Draw page
     getData().then(populateBars)
