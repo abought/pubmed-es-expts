@@ -1,0 +1,27 @@
+{
+  "name": "pubmed-es-expts",
+  "version": "1.0.0",
+  "description": "Tool to index and browse pubmed information via elasticsearch",
+  "main": "index.js",
+  "directories": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abought/pubmed-es-expts.git"
+  },
+  "author": "Andy Boughton",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/abought/pubmed-es-expts/issues"
+  },
+  "homepage": "https://github.com/abought/pubmed-es-expts#readme",
+  "devDependencies": {
+    "d3": "^4.7.2",
+    "node-sass": "^4.5.0",
+    "sass-loader": "^6.0.3",
+    "webpack": "^2.2.1"
+  }
+}

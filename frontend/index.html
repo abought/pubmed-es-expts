@@ -4,16 +4,22 @@
     <meta charset="UTF-8">
     <title>Sample elasticsearch frontend</title>
 
-    <script src="https://d3js.org/d3.v4.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+    <script src="static/bundle.js"></script>
 
     <style>
         .bar {
             fill: steelblue;
         }
-        text.label  {
+
+        .bar:hover {
+            fill: brown;
+        }
+
+        text.label {
             fill: #CCCCCC;
         }
+
         .axis text {
             font: 10px sans-serif;
         }
@@ -35,121 +41,5 @@
 
 <svg class="chart"></svg>
 
-
-<script>
-    /**
-     * When page loads, make an ES query to localhost, with a date based aggregation
-     * Fetches the data used to power the bar chart of articles by year
-     * @returns {Object[]} Array of {data, count} objects
-     */
-
-    // Draw the base chart
-    var margin = {top: 20, right: 30, bottom: 30, left: 40},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
-
-    var x = d3.scaleBand()
-        .range([0, width])
-        .padding(0.1);
-
-
-    var y = d3.scaleLinear()
-        .range([height, 0]);
-
-    var xAxis = d3.axisBottom()
-        .scale(x)
-        .tickFormat(function(d) {return d.getFullYear()});
-
-    var yAxis = d3.axisLeft()
-        .scale(y);
-
-    var chart = d3.select(".chart")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-
-
-        function getData() {
-        var query = {
-            "size": 0,
-            "aggregations": {
-                "by_year": {
-                    "date_histogram": {
-                        "field": "date",
-                        "interval": "year"
-                    }
-                }
-            }
-        };
-
-        // Get the data used to draw the histogram
-        return $.post('http://localhost:9200/pubmed/article/_search', JSON.stringify(query))
-            .then(function (res) {
-                return res.aggregations.by_year.buckets.map(function (item) {
-                    return {
-                        date: new Date(item.key),
-                        count: item.doc_count
-                    };
-                })
-            });
-    }
-
-    function populateBars(data) {
-        // Initial version draws heavily from:
-        //   https://bost.ocks.org/mike/bar/3/
-        //   and d3 v4 update, https://bl.ocks.org/d3noob/bdf28027e0ce70bd132edc64f1dd7ea4
-        x.domain(data.map(function (d) {
-            return d.date;
-        }));
-
-        y.domain([
-            0,
-            d3.max(data, function (d) {return d.count;}) + 1
-        ]);
-
-        chart.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
-
-        chart.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
-
-        var bars = chart.selectAll(".bars")
-            .data(data)
-            .enter()
-            .append("g")
-            .attr("class", "bars");
-
-        bars.append("rect")
-            .attr("class", "bar")
-            .attr("x", function (d) {
-                return x(d.date);
-            })
-            .attr("y", function (d) {
-                return y(d.count);
-            })
-            .attr("height", function (d) {
-                return height - y(d.count);
-            })
-            .attr("width", x.bandwidth());
-
-        bars.append("text")
-            .attr('class', 'label')
-            .attr("x", function(d){return x(d.date) + x.bandwidth() / 2;})
-            .attr("y", function (d) {
-                return y(d.count + 1);
-            })
-            .attr("dy", ".75em")
-            .text(function (d) {
-                return d.count;
-            });
-    }
-    // Draw page
-    getData().then(populateBars)
-
-</script>
 </body>
 </html>

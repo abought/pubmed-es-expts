@@ -1,5 +1,8 @@
+/bower_components
+/node_modules
 /data
 /env
+/frontend/static
 /notes
 .cache
 .DS_Store

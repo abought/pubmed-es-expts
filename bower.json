@@ -1,0 +1,21 @@
+{
+  "name": "pubmed-es-expts",
+  "homepage": "https://github.com/abought/pubmed-es-expts",
+  "authors": [
+    "Andy Boughton <abought@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.1.1"
+  }
+}
