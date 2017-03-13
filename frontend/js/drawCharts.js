@@ -43,7 +43,6 @@ function populateBars(chartSelector, data, shape) {
     y.domain([
         0,
         d3.max(data, function (d) {
-            console.log(d);
             return d.count;
         }) + 1
     ]);
@@ -61,10 +60,7 @@ function populateBars(chartSelector, data, shape) {
         .data(data)
         .enter()
         .append("g")
-        .attr("class", "bars")
-        .attr('nothing', function (d) {
-            console.log(d)
-        });
+        .attr("class", "bars");
 
     bars.append("rect")
         .attr("class", "bar")
@@ -82,7 +78,6 @@ function populateBars(chartSelector, data, shape) {
     bars.append("text")
         .attr('class', 'label')
         .attr("x", function (d) {
-            console.log('text');
             return x(d.date) + x.bandwidth() / 2;
         })
         .attr("y", function (d) {
@@ -92,6 +87,7 @@ function populateBars(chartSelector, data, shape) {
         .text(function (d) {
             return d.count;
         });
+    return bars;
 }
 
 module.exports = {populateBars: populateBars};
