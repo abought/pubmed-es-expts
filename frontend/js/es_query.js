@@ -31,7 +31,43 @@ function getYearCounts() {
     })
 }
 
+/**
+ * Significant terms aggregation for top keywords in a year. Will almost certainly be slow for large indices.
+ * @param date
+ * @returns {*}
+ */
+function getTermsForYear(date) {
+    var year = date.getFullYear();
+
+    var query = {
+        query: {
+            range: {
+                date: {
+                    gte: String(year),
+                    lte: String(year + 1),
+                    format: 'yyyy'
+                }
+            }
+        },
+        aggregations: {
+            significantKeywords: {
+                significant_terms: {field: 'keywords'}
+            }
+        }
+    };
+
+    return getData(query).then(function (res) {
+        return res.aggregations.significantKeywords.buckets.map(function (item) {
+            return {
+                key: item.key,
+                count: item.count
+            }
+        })
+    });
+}
+
 module.exports = {
     getData: getData,
-    getYearCounts: getYearCounts
+    getYearCounts: getYearCounts,
+    getTermsForYear: getTermsForYear
 };
