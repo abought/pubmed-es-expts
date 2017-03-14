@@ -19,8 +19,9 @@ histogramData.then(function (data) {
     })
 }).then(function (bars) {
     bars.on('click', function (d) {
-        var res = esQuery.getTermsForYear(d.date);
-        console.log('Significant terms are?', res);
+        var res = esQuery.getTermsForYear(d.date).then(function(res) {
+            console.log('Significant terms are?', res)
+        });
     });
 });
 

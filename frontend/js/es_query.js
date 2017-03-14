@@ -60,7 +60,7 @@ function getTermsForYear(date) {
         return res.aggregations.significantKeywords.buckets.map(function (item) {
             return {
                 key: item.key,
-                count: item.count
+                count: item.doc_count
             }
         })
     });

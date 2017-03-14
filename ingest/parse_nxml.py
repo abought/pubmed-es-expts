@@ -53,11 +53,13 @@ def pub_date_to_iso(pub_date_node) -> Union[str, None]:
     month = pub_date_node.findtext('month')
     day = pub_date_node.findtext('day')
 
-    date = (int(year), int(month), int(day))
+    # TODO: Improve handling of incomplete dates
+    date = (year, month, day)
     if not all(date):
         logger.warning(f'Incomplete year definition {year} {month} {day}')
         return None
     else:
+        date = [int(x) for x in date]
         return datetime.date(*date).isoformat()
 
 
