@@ -8,20 +8,12 @@ module.exports = {
     },
     externals: {
         // require("jquery") is external and available
-        //  on the global var jQuery, which is loaded with CDN
+        //  on the global var jQuery, which is loaded via CDN
         'jquery': 'jQuery'
     },
     module: {
         loaders: [
             { test: /\.css$/, loader: "style!css" }
         ]
-    },
-    plugins: [
-      new webpack.optimize.UglifyJsPlugin({
-        sourceMap: false,
-        compress: {
-          warnings: false
-        }
-      })
-    ]
+    }
 };
