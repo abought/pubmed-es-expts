@@ -11,18 +11,27 @@ var margin = {top: 20, right: 30, bottom: 30, left: 40},
 
 var histogramData = esQuery.getYearCounts();
 
+
+var selection = d3.select('#yearHisto');
+var yearChart = drawCharts.yearBarChart();
+
+
 histogramData.then(function (data) {
-    return drawCharts.populateBars('#yearHisto', data, {
-        width: width,
-        height: height,
-        margin: margin
-    })
-}).then(function (bars) {
-    bars.on('click', function (d) {
-        var res = esQuery.getTermsForYear(d.date).then(function(res) {
-            console.log('Significant terms are?', res)
-        });
-    });
+    console.log('newest', data);
+    selection.call(yearChart, data);
+    //yearChart(selection, data);
+
+    // return drawCharts.populateBars('#yearHisto', data, {
+    //     width: width,
+    //     height: height,
+    //     margin: margin
+    // })
+// }).then(function (bars) {
+//     bars.on('click', function (d) {
+//         var res = esQuery.getTermsForYear(d.date).then(function(res) {
+//             console.log('Significant terms are?', res)
+//         });
+//     });
 });
 
 
